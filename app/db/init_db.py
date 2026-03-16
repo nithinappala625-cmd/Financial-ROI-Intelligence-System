@@ -41,9 +41,11 @@ async def _seed_admin(session: AsyncSession) -> None:
         logger.info("Default admin user already exists — skipping seed.")
         return
 
+    # bcrypt max is 72 bytes — truncate seed password to be safe
+    seed_password = "admin123"[:72]
     admin = User(
         email="admin@financial-roi.com",
-        hashed_password=hash_password("admin123"),
+        hashed_password=hash_password(seed_password),
         full_name="System Administrator",
         role=RoleEnum.admin,
         is_active=True,

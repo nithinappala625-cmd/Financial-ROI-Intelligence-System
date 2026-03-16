@@ -13,6 +13,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # ── Database ──────────────────────────────────────────────────────────
@@ -34,6 +35,7 @@ class Settings(BaseSettings):
     KAFKA_BOOTSTRAP_SERVERS: str | None = None
     AI_ENGINE_BASE_URL: str | None = None
     SENDGRID_API_KEY: str | None = None
+    GROQ_API_KEY: str | None = None
 
 
 settings = Settings()

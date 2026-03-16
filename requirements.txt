@@ -10,3 +10,9 @@ passlib[bcrypt]
 python-multipart
 email-validator
 structlog
+crewai
+langgraph
+langchain-google-genai
+google-generativeai
+pyautogen<0.3
+python-dotenv

@@ -1,12 +1,23 @@
-"""
-Alert model — TODO: Implement.
+from typing import TYPE_CHECKING
+from sqlalchemy import Float, String, DateTime, Integer, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+import datetime
 
-Table: alerts
-Columns: id, type (AlertTypeEnum: budget_exhaustion/employee_underperformance/
-         financial_anomaly/cash_flow_risk/milestone_delay),
-         severity (AlertSeverityEnum: low/medium/high/critical),
-         entity_id, entity_type, message, resolved, resolved_by, created_at
-Relationships: standalone — references projects or employees
-"""
+from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin
 
-# TODO: Implement this model — see Section 11 and 14.2 of the design document.
+if TYPE_CHECKING:
+    from app.models.project import Project
+
+
+class Alert(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "alerts"
+
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    severity: Mapped[str] = mapped_column(String(50), nullable=False)
+    # Generic entity relationships might be stored loosely
+    entity_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    entity_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    message: Mapped[str] = mapped_column(String, nullable=False)
+    resolved: Mapped[bool] = mapped_column(default=False, nullable=False)
+
+    # created_at is automatically provided by TimestampMixin

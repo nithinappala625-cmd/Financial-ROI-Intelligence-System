@@ -27,13 +27,9 @@ class BaseRepo(Generic[ModelType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def get(
-        self, db: AsyncSession, id: int
-    ) -> ModelType | None:
+    async def get(self, db: AsyncSession, id: int) -> ModelType | None:
         """Get a single record by its primary key."""
-        result = await db.execute(
-            select(self.model).where(self.model.id == id)
-        )
+        result = await db.execute(select(self.model).where(self.model.id == id))
         return result.scalar_one_or_none()
 
     async def list(
@@ -44,21 +40,32 @@ class BaseRepo(Generic[ModelType]):
         limit: int = 100,
     ) -> Sequence[ModelType]:
         """List records with pagination."""
-        result = await db.execute(
-            select(self.model).offset(skip).limit(limit)
-        )
+        result = await db.execute(select(self.model).offset(skip).limit(limit))
+        return result.scalars().all()
+
+    async def list_with_filters(
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        **filters,
+    ) -> Sequence[ModelType]:
+        """List records with pagination and exact match filters."""
+        query = select(self.model)
+        for field, value in filters.items():
+            if value is not None and hasattr(self.model, field):
+                query = query.where(getattr(self.model, field) == value)
+
+        result = await db.execute(query.offset(skip).limit(limit))
         return result.scalars().all()
 
     async def count(self, db: AsyncSession) -> int:
         """Count total records."""
-        result = await db.execute(
-            select(func.count()).select_from(self.model)
-        )
+        result = await db.execute(select(func.count()).select_from(self.model))
         return result.scalar_one()
 
-    async def create(
-        self, db: AsyncSession, *, data: dict[str, Any]
-    ) -> ModelType:
+    async def create(self, db: AsyncSession, *, data: dict[str, Any]) -> ModelType:
         """Create a new record from a dict of field values."""
         instance = self.model(**data)
         db.add(instance)
@@ -80,9 +87,7 @@ class BaseRepo(Generic[ModelType]):
         await db.refresh(db_obj)
         return db_obj
 
-    async def delete(
-        self, db: AsyncSession, *, id: int
-    ) -> bool:
+    async def delete(self, db: AsyncSession, *, id: int) -> bool:
         """Delete a record by ID. Returns True if deleted, False if not found."""
         obj = await self.get(db, id)
         if obj is None:

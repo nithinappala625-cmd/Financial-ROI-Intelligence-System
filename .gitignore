@@ -15,8 +15,11 @@ build/
 # Virtual environment
 roi_env/
 venv/
+venv2/
 .venv/
 env/
+.qodo/
+.cache/
 
 # IDE
 .vscode/

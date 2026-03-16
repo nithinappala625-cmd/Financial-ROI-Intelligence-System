@@ -1,7 +1,8 @@
 """
 Shared FastAPI dependencies injected into all routes.
 
-Per Section 14: deps.py provides get_db(), get_current_user(), get_current_active_user().
+Per Section 14: deps.py provides get_db(), get_current_user(), get_current_active_user(),
+and re-exports require_role() from app.core.permissions.
 """
 
 from fastapi import Depends, HTTPException, status
@@ -9,6 +10,7 @@ from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_access_token, oauth2_scheme
+from app.core.permissions import require_role  # noqa: F401 — re-exported for routes
 from app.db.session import get_db as _get_db
 from app.models.user import User
 from app.repositories.user_repo import user_repo

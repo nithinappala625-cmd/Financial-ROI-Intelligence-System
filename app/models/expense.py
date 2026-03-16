@@ -1,11 +1,25 @@
-"""
-Expense model — TODO: Implement.
+from typing import TYPE_CHECKING
+from sqlalchemy import Float, String, Date, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+import datetime
 
-Table: expenses
-Columns: id, project_id (FK), category (ExpenseCategoryEnum: salaries/operations/
-         infrastructure/software_tools/marketing/miscellaneous),
-         amount, date, flagged_anomaly, notes
-Relationships: belongs to project
-"""
+from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin
 
-# TODO: Implement this model — see Section 4.2, 7, and 14.2 of the design document.
+if TYPE_CHECKING:
+    from app.models.project import Project
+
+
+class Expense(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "expenses"
+
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    category: Mapped[str] = mapped_column(String(100), nullable=False)
+    amount: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    date: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)
+    flagged_anomaly: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    notes: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # Relationships
+    project: Mapped["Project"] = relationship("Project", back_populates="expenses")

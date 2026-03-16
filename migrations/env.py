@@ -1,11 +1,12 @@
 """
-Alembic environment — async configuration for PostgreSQL.
+Alembic environment — async configuration for PostgreSQL (Neon).
 
 Imports all SQLAlchemy models so Alembic can auto-detect schema changes.
 Reads DATABASE_URL from config.py.
 """
 
 import asyncio
+import ssl
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -22,30 +23,31 @@ from config import settings  # noqa: E402
 # ── Import ALL models so Alembic sees them ────────────────────────────────
 from app.models.base import Base  # noqa: E402
 from app.models.user import User  # noqa: E402
-
-# NOTE: Uncomment these as developers implement the models:
-# from app.models.project import Project
-# from app.models.expense import Expense
-# from app.models.employee import Employee
-# from app.models.work_log import WorkLog
-# from app.models.alert import Alert
-# from app.models.ai_prediction import AIPrediction
-# from app.models.project_assignment import ProjectAssignment
+from app.models.project import Project  # noqa: E402
+from app.models.expense import Expense  # noqa: E402
+from app.models.employee import Employee  # noqa: E402
+from app.models.work_log import WorkLog  # noqa: E402
+from app.models.alert import Alert  # noqa: E402
+from app.models.ai_prediction import AIPrediction  # noqa: E402
+from app.models.project_assignment import ProjectAssignment  # noqa: E402
 
 # ── Alembic Config ────────────────────────────────────────────────────────
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace(
-    "postgresql+asyncpg", "postgresql+asyncpg"
-))
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 
+# ── SSL context for Neon (asyncpg requires this instead of sslmode=require) ─
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode — generates SQL script without DB connection."""
+    """Run migrations in 'offline' mode — generates SQL script without DB."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -71,6 +73,7 @@ async def run_async_migrations() -> None:
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"ssl": ssl_context},
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

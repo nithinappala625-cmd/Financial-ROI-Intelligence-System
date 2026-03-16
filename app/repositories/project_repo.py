@@ -1,1 +1,12 @@
-"""Project repository — TODO: get_by_id(), list_with_filters(), get_roi_history(), get_active_projects()."""
+from app.repositories.base_repo import BaseRepo
+from app.models.project import Project
+
+
+class ProjectRepo(BaseRepo[Project]):
+    """Project repository for basic project records implementation CRUD."""
+
+    def __init__(self):
+        super().__init__(Project)
+
+
+project_repo = ProjectRepo()

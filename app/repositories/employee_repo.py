@@ -1,1 +1,12 @@
-"""Employee repository — TODO: get_by_project(), get_evs_history(), get_underperformers()."""
+from app.repositories.base_repo import BaseRepo
+from app.models.employee import Employee
+
+
+class EmployeeRepo(BaseRepo[Employee]):
+    """Employee repository basic entity mapping."""
+
+    def __init__(self):
+        super().__init__(Employee)
+
+
+employee_repo = EmployeeRepo()
