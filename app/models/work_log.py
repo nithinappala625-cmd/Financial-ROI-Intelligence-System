@@ -3,14 +3,14 @@ from sqlalchemy import Float, String, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import datetime
 
-from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin
+from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin
 
 if TYPE_CHECKING:
     from app.models.employee import Employee
     from app.models.project import Project
 
 
-class WorkLog(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+class WorkLog(Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin):
     __tablename__ = "work_logs"
 
     employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=False)

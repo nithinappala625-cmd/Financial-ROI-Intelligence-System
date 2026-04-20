@@ -41,3 +41,14 @@ class IntegerPrimaryKeyMixin:
         primary_key=True,
         autoincrement=True,
     )
+
+
+class TenantMixin:
+    """Mixin that adds a tenant_id column to tables for multi-tenant schema isolation."""
+
+    tenant_id: Mapped[int] = mapped_column(
+        Integer,
+        index=True,
+        nullable=False,
+        default=1,
+    )

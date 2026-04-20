@@ -17,8 +17,9 @@ from app.api.v1.alerts import router as alerts_router
 from app.api.v1.ai import router as ai_router
 from app.api.v1.project_assignments import router as project_assignments_router
 from app.api.v1.agentic_system import router as agentic_system_router
+from app.api.v1.milestones import router as milestones_router
 
-api_router = APIRouter(prefix="/api/v1")
+api_router = APIRouter()
 
 # ── Core (implemented) ──────────────────────────────────────────────────
 api_router.include_router(auth_router)
@@ -32,3 +33,4 @@ api_router.include_router(alerts_router)
 api_router.include_router(ai_router)
 api_router.include_router(project_assignments_router)
 api_router.include_router(agentic_system_router)
+api_router.include_router(milestones_router)

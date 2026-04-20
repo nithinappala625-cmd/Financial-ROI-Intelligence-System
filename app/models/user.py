@@ -10,7 +10,7 @@ import enum
 from sqlalchemy import Boolean, Enum, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, TimestampMixin, IntegerPrimaryKeyMixin
+from app.models.base import Base, TimestampMixin, IntegerPrimaryKeyMixin, TenantMixin
 
 
 class RoleEnum(str, enum.Enum):
@@ -22,7 +22,7 @@ class RoleEnum(str, enum.Enum):
     employee = "employee"
 
 
-class User(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+class User(Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin):
     """SQLAlchemy ORM model for the users table."""
 
     __tablename__ = "users"
@@ -43,9 +43,6 @@ class User(Base, IntegerPrimaryKeyMixin, TimestampMixin):
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False
-    )
-    tenant_id: Mapped[int | None] = mapped_column(
-        Integer, nullable=True
     )
 
     def __repr__(self) -> str:

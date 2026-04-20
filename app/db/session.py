@@ -37,8 +37,42 @@ async_session_maker = async_sessionmaker(
 
 
 async def get_db():
-    """FastAPI dependency — yields an async database session."""
+    """FastAPI dependency — yields an async database session (Primary)."""
     async with async_session_maker() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+# Read-Replica Configuration for Analytics
+ro_engine = None
+ro_session_maker = None
+
+if getattr(settings, "RO_DATABASE_URL", None):
+    ro_engine = create_async_engine(
+        settings.RO_DATABASE_URL,
+        echo=False,
+        future=True,
+        connect_args={"ssl": _ssl_ctx},
+    )
+    ro_session_maker = async_sessionmaker(
+        ro_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+
+async def get_ro_db():
+    """Yields an async read-replica database session for analytics.
+    Falls back to primary database if no replica URL is configured.
+    """
+    if ro_session_maker is None:
+        async for session in get_db():
+            yield session
+        return
+
+    async with ro_session_maker() as session:
         try:
             yield session
         finally:

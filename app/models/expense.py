@@ -3,13 +3,13 @@ from sqlalchemy import Float, String, Date, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import datetime
 
-from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin
+from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin
 
 if TYPE_CHECKING:
     from app.models.project import Project
 
 
-class Expense(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+class Expense(Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin):
     __tablename__ = "expenses"
 
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)

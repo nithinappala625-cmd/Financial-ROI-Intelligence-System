@@ -16,3 +16,6 @@ langchain-google-genai
 google-generativeai
 pyautogen<0.3
 python-dotenv
+httpx
+redis
+aiokafka

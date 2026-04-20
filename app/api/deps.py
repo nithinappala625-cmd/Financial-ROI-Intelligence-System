@@ -59,6 +59,11 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
+    # Multi-tenant schema isolation (F-011)
+    if user.tenant_id is not None:
+        from sqlalchemy import text
+        await db.execute(text(f'SET search_path TO "tenant_{user.tenant_id}", public'))
+
     return user
 
 

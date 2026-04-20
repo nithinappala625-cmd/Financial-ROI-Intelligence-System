@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     # ── Database ──────────────────────────────────────────────────────────
     DATABASE_URL: str
+    RO_DATABASE_URL: str | None = None  # Read replica for analytics
 
     # ── JWT / Auth ────────────────────────────────────────────────────────
     JWT_SECRET_KEY: str

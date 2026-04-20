@@ -11,6 +11,9 @@ from app.services.expense_service import (
     list_expenses,
     update_expense,
     delete_expense,
+    list_anomalies,
+    approve_anomaly,
+    dismiss_anomaly,
 )
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
@@ -66,3 +69,46 @@ async def update_existing_expense(
     current_user: User = Depends(get_current_user),
 ):
     return await update_expense(db, expense_id, expense_in)
+
+@router.get("/summary/by-category")
+async def get_expense_summary(
+    project_id: int | None = Query(None, description="Filter by project ID"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    expenses = await list_expenses(db, project_id=project_id, skip=0, limit=10000)
+    summary = {}
+    for exp in expenses:
+        summary[exp.category] = summary.get(exp.category, 0) + float(exp.amount)
+    return summary
+
+
+@router.get("/anomalies/list", response_model=Sequence[ExpenseResponse])
+async def read_anomalies(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(RoleEnum.finance_manager)),
+):
+    """F008: Anomaly Flag Review UI - List all anomalous expenses."""
+    return await list_anomalies(db, skip=skip, limit=limit)
+
+
+@router.put("/anomalies/{expense_id}/approve", response_model=ExpenseResponse)
+async def approve_anomalous_expense(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(RoleEnum.finance_manager)),
+):
+    """F008: Approve an anomalous expense."""
+    return await approve_anomaly(db, expense_id)
+
+
+@router.put("/anomalies/{expense_id}/dismiss", response_model=ExpenseResponse)
+async def dismiss_anomalous_expense(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(RoleEnum.finance_manager)),
+):
+    """F008: Dismiss an anomalous expense."""
+    return await dismiss_anomaly(db, expense_id)

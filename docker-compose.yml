@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  db:
+  db-primary:
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
@@ -10,26 +10,83 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_primary:/var/lib/postgresql/data
+
+  db-replica:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "YOUR_PASSWORD"
+      POSTGRES_DB: financial_ri
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_replica:/var/lib/postgresql/data
+    depends_on:
+      - db-primary
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
 
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      ALLOW_PLAINTEXT_LISTENER: yes
+    ports:
+      - "9092:9092"
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@db:5432/financial_ri
+      - DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@db-primary:5432/financial_ri
+      - RO_DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@db-replica:5432/financial_ri
       - REDIS_URL=redis://redis:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - AI_ENGINE_BASE_URL=http://ai-engine:8001
       - JWT_SECRET_KEY=dev_secret
       - ENVIRONMENT=docker
     depends_on:
-      - db
+      - db-primary
+      - db-replica
       - redis
-    command: uvicorn main:app --host 0.0.0.1 --port 8000 --reload
+      - kafka
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  ai-engine:
+    build: ./ai_engine
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@db-primary:5432/financial_ri
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - ENVIRONMENT=docker
+    depends_on:
+      - db-primary
+      - kafka
+
+  flutter-dashboard:
+    build: ./flutter_dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
 
 volumes:
-  postgres_data:
+  postgres_data_primary:
+  postgres_data_replica:

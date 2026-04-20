@@ -54,3 +54,29 @@ async def delete_expense(db: AsyncSession, expense_id: int) -> bool:
     if not success:
         raise NotFoundError("Expense not found")
     return success
+
+
+async def list_anomalies(
+    db: AsyncSession, skip: int = 0, limit: int = 100
+) -> Sequence[Expense]:
+    return await expense_repo.list_with_filters(
+        db, skip=skip, limit=limit, flagged_anomaly=True
+    )
+
+
+async def approve_anomaly(db: AsyncSession, expense_id: int) -> Expense:
+    """Approve the anomalous expense (clear the anomaly flag)."""
+    db_obj = await get_expense(db, expense_id)
+    return await expense_repo.update(
+        db, db_obj=db_obj, update_data={"flagged_anomaly": False}
+    )
+
+
+async def dismiss_anomaly(db: AsyncSession, expense_id: int) -> Expense:
+    """Dismiss the anomalous expense (e.g., mark it but keep it flagged or delete it).
+    For now, we'll just clear the flag or you could keep it and add a resolved state.
+    We'll set flagged_anomaly = False and add notes."""
+    db_obj = await get_expense(db, expense_id)
+    return await expense_repo.update(
+        db, db_obj=db_obj, update_data={"flagged_anomaly": False, "notes": "Anomaly dismissed"}
+    )

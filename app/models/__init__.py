@@ -12,6 +12,7 @@ from app.models.work_log import WorkLog
 from app.models.alert import Alert
 from app.models.ai_prediction import AIPrediction
 from app.models.project_assignment import ProjectAssignment
+from app.models.milestone import Milestone
 
 __all__ = [
     "Base",
@@ -26,4 +27,5 @@ __all__ = [
     "Alert",
     "AIPrediction",
     "ProjectAssignment",
+    "Milestone",
 ]

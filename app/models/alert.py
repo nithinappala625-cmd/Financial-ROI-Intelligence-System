@@ -3,13 +3,13 @@ from sqlalchemy import Float, String, DateTime, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import datetime
 
-from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin
+from app.models.base import Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin
 
 if TYPE_CHECKING:
     from app.models.project import Project
 
 
-class Alert(Base, IntegerPrimaryKeyMixin, TimestampMixin):
+class Alert(Base, IntegerPrimaryKeyMixin, TimestampMixin, TenantMixin):
     __tablename__ = "alerts"
 
     type: Mapped[str] = mapped_column(String(50), nullable=False)
