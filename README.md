@@ -27,30 +27,30 @@ backend/
 │   ├── models/              # SQLAlchemy ORM models
 │   │   ├── base.py          # Base, TimestampMixin, IntegerPrimaryKeyMixin
 │   │   ├── user.py          # User model + RoleEnum ✅
-│   │   ├── project.py       # TODO
-│   │   ├── expense.py       # TODO
-│   │   ├── employee.py      # TODO
-│   │   ├── work_log.py      # TODO
-│   │   ├── alert.py         # TODO
-│   │   ├── ai_prediction.py # TODO
-│   │   └── project_assignment.py  # TODO
+│   │   ├── project.py       # Project model + Relationships ✅
+│   │   ├── expense.py       # Expense tracking model ✅
+│   │   ├── employee.py      # Employee profile + skills ✅
+│   │   ├── work_log.py      # Task & hours logging ✅
+│   │   ├── alert.py         # System alerts & notifications ✅
+│   │   ├── ai_prediction.py # ML prediction results ✅
+│   │   └── project_assignment.py  # Staffing & assignments ✅
 │   ├── schemas/             # Pydantic request/response models
 │   │   ├── auth.py          # UserCreate, UserRead, TokenResponse ✅
 │   │   ├── common.py        # PaginatedResponse, ErrorResponse ✅
-│   │   └── ...              # TODO (project, expense, employee, etc.)
+│   │   └── ...              # Domain schemas (Project, Expense, etc.) ✅
 │   ├── repositories/        # Data access layer (async CRUD)
 │   │   ├── base_repo.py     # Generic BaseRepo[T] ✅
 │   │   ├── user_repo.py     # UserRepo ✅
-│   │   └── ...              # TODO
+│   │   └── ...              # Domain repositories ✅
 │   ├── services/            # Business logic layer
 │   │   ├── auth_service.py  # Register, login, refresh ✅
-│   │   └── ...              # TODO
+│   │   └── ...              # Domain services (ROI calc, etc.) ✅
 │   ├── api/                 # API routes
 │   │   ├── deps.py          # Shared deps (get_db, get_current_user) ✅
 │   │   └── v1/
 │   │       ├── router.py    # Master router ✅
 │   │       ├── auth.py      # Auth endpoints ✅
-│   │       └── ...          # TODO (projects, expenses, etc.)
+│   │       └── ...          # Domain routers (projects, expenses, ai, etc.) ✅
 │   ├── core/                # Security, logging, exceptions
 │   │   ├── security.py      # JWT + bcrypt ✅
 │   │   ├── permissions.py   # RBAC require_role() ✅
